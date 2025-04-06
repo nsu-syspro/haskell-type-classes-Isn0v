@@ -80,6 +80,11 @@ instance Parse IExpr where
               [(n, "")] -> parse' xs (Lit n : stack)
               _ -> Nothing
 
+instance Parse Integer where
+  parse s = case reads s of
+    [(n, "")] -> Just n
+    _ -> Nothing
+
 -- * Evaluation with parsing
 
 -- | Parses given expression in Reverse Polish Notation and evaluates it
