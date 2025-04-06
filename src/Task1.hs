@@ -28,7 +28,10 @@ data IExpr =
 -- 9
 --
 evalIExpr :: IExpr -> Integer
-evalIExpr = error "TODO: define evalIExpr"
+evalIExpr x = case x of
+  Lit n -> n
+  Add a b -> evalIExpr a + evalIExpr b
+  Mul a b -> evalIExpr a * evalIExpr b
 
 -- * Parsing
 
@@ -55,7 +58,38 @@ class Parse a where
 -- Nothing
 --
 instance Parse IExpr where
-  parse = error "TODO: define parse (Parse IExpr)"
+  parse s = 
+    case words s of
+      [] -> Nothing
+      [x] -> Just (Lit (read x))
+      xs -> parse' xs []
+    where
+      parse' [] stack = case stack of
+        [x] -> Just x
+        _ -> Nothing
+      parse' (x:xs) stack =
+        case x of
+          "+" -> case stack of
+            (a:b:rest) -> parse' xs (Add b a : rest)
+            _ -> Nothing
+          "*" -> case stack of
+            (a:b:rest) -> parse' xs (Mul b a : rest)
+            _ -> Nothing
+          _ ->
+            case reads x :: [(Integer, String)] of
+              [(n, "")] -> parse' xs (Lit n : stack)
+              _ -> Nothing
+
+instance Parse Integer where
+  parse s = case reads s of
+    [(n, "")] -> Just n
+    _ -> Nothing
+
+
+instance Parse Bool where
+  parse "True"  = Just True
+  parse "False" = Just False
+  parse _       = Nothing
 
 -- * Evaluation with parsing
 
@@ -77,4 +111,6 @@ instance Parse IExpr where
 -- Nothing
 --
 evaluateIExpr :: String -> Maybe Integer
-evaluateIExpr = error "TODO: define evaluateIExpr"
+evaluateIExpr s = case parse s of
+  Just expr -> Just (evalIExpr expr)
+  Nothing -> Nothing
