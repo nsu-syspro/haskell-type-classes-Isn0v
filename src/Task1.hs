@@ -85,6 +85,12 @@ instance Parse Integer where
     [(n, "")] -> Just n
     _ -> Nothing
 
+
+instance Parse Bool where
+  parse "True"  = Just True
+  parse "False" = Just False
+  parse _       = Nothing
+
 -- * Evaluation with parsing
 
 -- | Parses given expression in Reverse Polish Notation and evaluates it
